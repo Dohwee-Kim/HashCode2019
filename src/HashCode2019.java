@@ -1,13 +1,25 @@
 import java.io.*;
-import java.util.Scanner;
+import java.util.*;
+
 
 public class HashCode2019 {
 
-    public static String a_FilePath = "./data/a_example.txt";
-    public static String b_FilePath = "./data/b_lovely_landscapes.txt";
-    public static String c_FilePath = "./data/c_memorable_moment.txt";
-    public static String d_FilePath = "./data/d_pet_pictures.txt";
-    public static String e_FilePath = "./data/e_shiny_selfies.txt";
+    public static final String A_FILE_PATH = "./data/a_example.txt";
+    public static final int A_FILE_DATA_SIZE = 4;
+
+    public static final String B_FILE_PATH = "./data/b_lovely_landscapes.txt";
+    public static final int B_FILE_DATA_SIZE = 80000;
+
+    public static final String C_FILE_PATH = "./data/c_memorable_moment.txt";
+    public static final int C_FILE_DATA_SIZE = 1000;
+
+    public static final String D_FILE_PATH = "./data/d_pet_pictures.txt";
+    public static final int D_FILE_DATA_SIZE = 90000;
+
+    public static final String E_FILE_PATH = "./data/e_shiny_selfies.txt";
+    public static final int E_FILE_DATA_SIZE = 80000;
+
+
 
     public static void main(String[] args) {
         String choice;
@@ -42,28 +54,18 @@ public class HashCode2019 {
 
     public static void exampleTest(){
         System.out.println("Test A is running ");
-        FileInputStream fileStream =null; //File stream
-        try {
 
-            fileStream = new FileInputStream( a_FilePath );
+        List<PictureData> pictureDataList = fileLoader(A_FILE_PATH);
+        List<PictureData> outOutDataList = new ArrayList<>(pictureDataList.size());
 
-            byte[ ] readBuffer = new byte[fileStream.available()];
-            while(fileStream.read(readBuffer) != -1) {
+        int randomPicked = getRandomNumberInRange(0, pictureDataList.size());
+
+        for ( int i=0; i < pictureDataList.size(); i++) {
+            if (i== randomPicked){
+                continue;
             }
 
-            System.out.println(new String (readBuffer) );
-            fileStream.close();
-        } catch (Exception e) {
-            System.out.println("File Read error");
-            e.getStackTrace();
-        }
 
-        finally {
-            try {
-                fileStream.close(); // Close file
-            } catch (Exception e) {
-                System.out.println("File closing failure in Finally");
-            }
         }
 
     }
@@ -84,10 +86,85 @@ public class HashCode2019 {
         System.out.println("Test E is running ");
     }
 
-    //TODO : Refactor this later
-    public static void fileLoader(String filePath) {
+    public static List<PictureData> fileLoader(String filePath) {
+        BufferedReader br = null;
+        List<PictureData> pictureDataArrayList = new ArrayList<>(A_FILE_DATA_SIZE);
 
+        try {
+
+            int pictureIndexNumber = 0;
+
+            File txtFile = new File(A_FILE_PATH);
+            System.out.println("Open the file .... ");
+            br = new BufferedReader(new FileReader(txtFile));
+            String line ="";
+            //Read line by line
+            while((line = br.readLine()) != null) {
+                String[] token = line.split(" ", -1);
+
+                if (line.matches("^[0-9].*$")) {
+                    continue;
+                }
+
+                PictureData pictureData = new PictureData( pictureIndexNumber ,token[0].charAt(0));
+
+                for (int i = 2 ; i < token.length ; i++ ) {
+                    pictureData.addHashTag(token[i]);
+                }
+
+                pictureDataArrayList.add(pictureData);
+                //Increase index
+                pictureIndexNumber++;
+            }
+
+            System.out.println("PictureData read complete");
+
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File NOT FOUND error");
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close(); // Close file
+                } catch (Exception e) {
+                    System.out.println("File closing failure in Finally");
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return pictureDataArrayList;
     }
 
+    private static int getRandomNumberInRange(int min, int max) {
+
+        Random r = new Random();
+        return r.ints(min, (max + 1)).findFirst().getAsInt();
+    }
+
+    /**
+     *
+     * @param h1 : Horizontal picture 1
+     * @param h2 : Horizontal picture 2
+     * @return : min score of (union, intersection, and difference of tags)
+     */
+
+    private static int scoreCalculatorHtoH(PictureData h1, PictureData h2){
+        return 1;
+    }
+
+    /**
+     *
+     * @param h1 : Horizontal picture 1
+     * @param v1 : Vertical picture 1 (will be combined with v2)
+     * @param v2 : Vertical picture 2
+     * @return : min score of (union, intersection, and difference of tags)
+     */
+    private static int scoreCalculatorHtoV(PictureData h1, PictureData v1, PictureData v2){
+        return 1;
+    }
 
 }
