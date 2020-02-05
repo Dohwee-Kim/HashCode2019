@@ -64,8 +64,6 @@ public class HashCode2019 {
             if (i== randomPicked){
                 continue;
             }
-
-
         }
 
     }
@@ -153,7 +151,22 @@ public class HashCode2019 {
      */
 
     private static int scoreCalculatorHtoH(PictureData h1, PictureData h2){
-        return 1;
+        int minScore = 0;
+
+        int interMin = 0;
+        int diffMin = 0;
+
+
+        // if one of them is subset of the other one, return 0
+        if (h1.getHashTags().containsAll(h2.getHashTags()) || h2.getHashTags().containsAll(h1.getHashTags())) {
+            minScore = 0;
+            return minScore;
+        }
+        else {
+            interMin = h1.getHashTags().retainAll( h2.getHashTags() );
+
+        }
+        return minScore;
     }
 
     /**
@@ -165,6 +178,10 @@ public class HashCode2019 {
      */
     private static int scoreCalculatorHtoV(PictureData h1, PictureData v1, PictureData v2){
         return 1;
+    }
+
+    private static PictureData vvMerger(PictureData v1, PictureData v2) {
+
     }
 
 }
