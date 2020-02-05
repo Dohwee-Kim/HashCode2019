@@ -1,5 +1,7 @@
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
+
 
 
 public class HashCode2019 {
@@ -55,17 +57,34 @@ public class HashCode2019 {
     public static void exampleTest(){
         System.out.println("Test A is running ");
 
-        List<PictureData> pictureDataList = fileLoader(A_FILE_PATH);
-        List<PictureData> outOutDataList = new ArrayList<>(pictureDataList.size());
+        ArrayList<PictureData> pictureDataList = fileLoader(A_FILE_PATH);
+        ArrayList<PictureData> outPutDataList = new ArrayList<>(pictureDataList.size());
 
         int randomPicked = getRandomNumberInRange(0, pictureDataList.size());
 
+        // Put random picked one to output list
+        outPutDataList.add(pictureDataList.get(randomPicked));
+
+
+        //
         for ( int i=0; i < pictureDataList.size(); i++) {
-            if (i== randomPicked){
+            int maxIndex = -1;
+
+            if (i == randomPicked){
                 continue;
+            }
+
+            //Compare the ast element with pictureDataList elements
+            else if (maxIndex < scoreCalculatorHtoH(outPutDataList.get(outPutDataList.size()-1) , pictureDataList.get(i)) ) {
+                    maxIndex = i;
+                    //push to last
+                    outPutDataList.add(pictureDataList.get(i));
+                    //pop added element
+                    pictureDataList.remove(i);
             }
         }
 
+        System.out.println("done");
     }
 
     public static void lovelyLandscapesTest() {
@@ -84,9 +103,11 @@ public class HashCode2019 {
         System.out.println("Test E is running ");
     }
 
-    public static List<PictureData> fileLoader(String filePath) {
+    public static ArrayList<PictureData> fileLoader(String filePath) {
         BufferedReader br = null;
-        List<PictureData> pictureDataArrayList = new ArrayList<>(A_FILE_DATA_SIZE);
+        ArrayList<PictureData> pictureDataArrayList = new ArrayList<>(A_FILE_DATA_SIZE);
+        //TODO: update this number later
+        ArrayList<PictureData> verticalDataArrayList = new ArrayList<>(A_FILE_DATA_SIZE);
 
         try {
 
@@ -100,6 +121,7 @@ public class HashCode2019 {
             while((line = br.readLine()) != null) {
                 String[] token = line.split(" ", -1);
 
+                //check this is not a first line
                 if (line.matches("^[0-9].*$")) {
                     continue;
                 }
@@ -110,11 +132,21 @@ public class HashCode2019 {
                     pictureData.addHashTag(token[i]);
                 }
 
-                pictureDataArrayList.add(pictureData);
+                //collect all Hori
+                if (token[0].matches("H")) {
+                    pictureDataArrayList.add(pictureData);
+                }
+
+                //collect all Vert
+                else if (token[0].matches("V")) {
+                    verticalDataArrayList.add(pictureData);
+                }
+
                 //Increase index
                 pictureIndexNumber++;
             }
 
+            pictureDataArrayList.addAll(vvMerger(verticalDataArrayList));
             System.out.println("PictureData read complete");
 
 
@@ -154,7 +186,8 @@ public class HashCode2019 {
         int minScore = 0;
 
         int interMin = 0;
-        int diffMin = 0;
+        int diffMinH1 = 0;
+        int diffMinH2 = 0;
 
 
         // if one of them is subset of the other one, return 0
@@ -163,10 +196,26 @@ public class HashCode2019 {
             return minScore;
         }
         else {
-            interMin = h1.getHashTags().retainAll( h2.getHashTags() );
+            //interMin = h1.getHashTags().retainAll( h2.getHashTags() );
+            //intersection
+            ArrayList <String> temph1 = h1.getHashTags();
+            temph1.retainAll(h2.getHashTags());
+            interMin = temph1.size();
 
+            //diff  H1 - H2
+            temph1 = h1.getHashTags();
+            temph1.removeAll(h2.getHashTags());
+            diffMinH1 = temph1.size();
+
+            //diff H2 - H1
+            ArrayList <String> temph2 = h2.getHashTags();
+            temph2.removeAll(h1.getHashTags());
+            diffMinH2 = temph2.size();
+
+            minScore = Math.min(Math.min(interMin, diffMinH1), diffMinH2);
+
+            return minScore;
         }
-        return minScore;
     }
 
     /**
@@ -180,8 +229,23 @@ public class HashCode2019 {
         return 1;
     }
 
-    private static PictureData vvMerger(PictureData v1, PictureData v2) {
 
+    private static ArrayList<PictureData> vvMerger(List<PictureData> verticalList) {
+        //WARNING : make sure vertical images number is divisible by 2
+        ArrayList<PictureData> mergedVerticalList = new ArrayList<PictureData>(verticalList.size()/2);
+
+        for (int i=0; i< verticalList.size(); i+=2 ) {
+
+            //Store 2 indicis
+            PictureData mergedPictureData = new PictureData( verticalList.get(i).getPictureIndex(), verticalList.get(i+1).getPictureIndex(), "V".charAt(0) );
+
+            mergedPictureData.addAllHashTag(verticalList.get(i).getHashTags());
+            mergedPictureData.addAllHashTag(verticalList.get(i+1).getHashTags());
+
+            mergedVerticalList.add(mergedPictureData);
+        }
+
+        return mergedVerticalList;
     }
 
 }
